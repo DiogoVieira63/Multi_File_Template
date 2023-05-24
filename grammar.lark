@@ -1,0 +1,4 @@
+start: ("==" section)*
+section: meta | tree | pyproject | file
+meta: "meta" atribuicao*
+atribuicao: identificador ":" valor

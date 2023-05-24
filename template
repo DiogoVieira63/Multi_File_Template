@@ -1,18 +1,15 @@
 === meta
-name: mytool
-// provided or ask
 author: JJoao
-// provided or default
+name: mytool
 
 === tree
 pyproject.toml
+tests/
+- _test-1.py
+exemplo/
 {{name}}/
 - __init__.py
 - {{name}}.md
-exemplo/
-README.md
-tests/
-- test-1.py
 
 === pyproject.toml
 [build-system]
@@ -28,16 +25,16 @@ readme = "{{name}}.md"
 [project.scripts]
 ## script1 = "{{name}}:main"
 
-=== {{name}}/{{name}}.md
-# NAME
-{{name}} - FIXME the fantastic module for...
-
-=== {{name}}/__init__.py
-""" FIXME: docstring """
-__version__ = "0.1.0"
-
 === tests/_test-1.py
 import pytest
 import {{name}}
 def test_1():
-    assert "FIXME" == "FIXME"
+    assert "FIXME" == "FIXME"=== {{name}}/__init__.py
+""" FIXME: docstring """
+__version__ = "0.1.0"
+
+=== {{name}}/{{name}}.md
+# NAME
+{{name}} - FIXME the fantastic module for...
+
+
