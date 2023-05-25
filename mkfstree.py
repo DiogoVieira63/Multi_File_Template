@@ -1,6 +1,4 @@
 import os
-import sys
-
 import argparse
 
 def name_type(string):
@@ -9,18 +7,14 @@ def name_type(string):
     key, name = string.split('=', 1)
     return name
 
-# Create the argument parser
 parser = argparse.ArgumentParser(description='mkfstree - Create a file system tree')
 
-# Add the arguments
 parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose output')
 parser.add_argument('name', metavar='name', type=name_type, help='Name of the project')
 parser.add_argument('templateflit', metavar='templateflit', type=str, nargs='?', help='Path to the template file')
 
-# Parse the arguments
 args = parser.parse_args()
 
-# Access the parsed arguments
 input = args.name
 templateflit = args.templateflit
 verbose = args.verbose

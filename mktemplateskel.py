@@ -9,19 +9,15 @@ def name_type(string):
     key, name = string.split('=', 1)
     return name
 
-# Create the argument parser
 parser = argparse.ArgumentParser(description='mkfstree - Create a file system tree')
 
-# Add the arguments
 parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose output')
 parser.add_argument('name', metavar='name', type=name_type, help='Name of the project')
 parser.add_argument('project_path', metavar=str, type=str, help='Path to the input project')
 parser.add_argument('-o','--output', metavar='output', type=str, help='Path of the output file (template)')
 
-# Parse the arguments
 args = parser.parse_args()
 
-# Access the parsed arguments
 name = args.name
 input = args.project_path
 verbose = args.verbose
