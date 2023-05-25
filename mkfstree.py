@@ -1,12 +1,33 @@
 import os
 import sys
 
-if len(sys.argv) != 2:
-    print("Usage: python mkfstree.py <input>")
-    sys.exit(1)
+import argparse
 
-input = sys.argv[1]
-out = "output"
+def name_type(string):
+    if '=' not in string:
+        raise argparse.ArgumentTypeError("Invalid format for name argument. Should be 'name=<name of the project>'.")
+    key, name = string.split('=', 1)
+    return name
+
+# Create the argument parser
+parser = argparse.ArgumentParser(description='mkfstree - Create a file system tree')
+
+# Add the arguments
+parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose output')
+parser.add_argument('name', metavar='name', type=name_type, help='Name of the project')
+parser.add_argument('templateflit', metavar='templateflit', type=str, nargs='?', help='Path to the template file')
+
+# Parse the arguments
+args = parser.parse_args()
+
+# Access the parsed arguments
+input = args.name
+templateflit = args.templateflit
+verbose = args.verbose
+
+if templateflit: out = templateflit
+else: out = "output"
+
 
 with open(input, 'r') as f:
     lines = f.read()
