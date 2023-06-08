@@ -5,25 +5,33 @@ def name_type(string):
     if '=' not in string:
         raise argparse.ArgumentTypeError("Invalid format for name argument. Should be 'name=<name of the project>'.")
     key, name = string.split('=', 1)
-    return name
+    return key,name
 
-parser = argparse.ArgumentParser(description='mkfstree - Create a file system tree')
+parser = argparse.ArgumentParser(prog="mkfstree", epilog="Create a file system tree",description='mkfstree - Create a file system tree')
 
-parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose output')
-parser.add_argument('name', metavar='name', type=name_type, help='Name of the project')
-parser.add_argument('templateflit', metavar='templateflit', type=str, nargs='?', help='Path to the template file')
+parser.add_argument('-v','--vars', metavar='vars', type=name_type, nargs='+', help='Meta variables of the project')
+parser.add_argument('template', metavar='template', type=str, help='Path to the template file')
+parser.add_argument('-o','--output', metavar='output', type=str, help='Path of the output folder')
+parser.add_argument('-i','--interactive',action='store_true',help='Interactive mode')
+
 
 args = parser.parse_args()
 
-input = args.name
-templateflit = args.templateflit
-verbose = args.verbose
+if args.vars:
+    vars = {key:value for (key,value) in args.vars}
+else:
+    vars={}
+    
+#input = args.name
+template = args.template
 
-if templateflit: out = templateflit
-else: out = "output"
+out = args.output
+if not out: out = "output"
+
+interactive = args.interactive
 
 
-with open(input, 'r') as f:
+with open(template, 'r') as f:
     lines = f.read()
 
 sections = lines.split('===')[1:]
@@ -87,6 +95,29 @@ for section in sections:
     name = lines[0].strip()
     if name == 'meta':
         meta = parse_meta(lines[1:])
+        for key in vars:
+            meta[key] = vars[key]
+        
+        for m in meta:
+            if interactive:
+                answer = False
+                if meta[m]:
+                    while not answer:
+                        answer = input(f"Meta variable {m} has this value: {meta[m]}. If you want to change it input a new value, else just press Enter.\n> ")
+                        if answer:
+                            meta[m] = answer
+                        else:
+                            answer = True
+                            
+                else:
+                    while not meta[m]: 
+                        meta[m] = input(f"Meta Variable {m} missing. Please enter a value for {m}: ").strip()
+            else:
+                if not meta[m]:
+                    print(f"Meta Variable {m} missing. Pass {m} as a parameter with -v {m}=... or use interactive mode with -i")
+                    exit()
+        
+
     elif name == 'tree':
         tree = parse_tree(lines[1:],meta)            
     else:

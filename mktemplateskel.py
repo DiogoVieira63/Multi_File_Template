@@ -7,40 +7,53 @@ def name_type(string):
     if '=' not in string:
         raise argparse.ArgumentTypeError("Invalid format for name argument. Should be 'name=<name of the project>'.")
     key, name = string.split('=', 1)
-    return name
+    return key,name
 
-parser = argparse.ArgumentParser(description='mkfstree - Create a file system tree')
+parser = argparse.ArgumentParser(prog='mktemplateskel', epilog='Create Templates', description='mktemplateskel - Create Templates')
 
-parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose output')
-parser.add_argument('name', metavar='name', type=name_type, help='Name of the project')
-parser.add_argument('project_path', metavar=str, type=str, help='Path to the input project')
+parser.add_argument('-v', '--vars',type=name_type, nargs='+',help='Name of the template')
+# parser.add_argument('-n','--name', metavar='name', type=str, help='Name of the template')
+parser.add_argument('-p','--project_path', metavar=str, type=str, help='Path to the input project')
 parser.add_argument('-o','--output', metavar='output', type=str, help='Path of the output file (template)')
+parser.add_argument('-i','--interactive',action='store_true',help='Interactive mode')
+parser.add_argument('-e','--exclude',nargs='+',help="Don't change content of provided files. If you want to exclude all files just type -e all")
 
 args = parser.parse_args()
-
-name = args.name
-input = args.project_path
-verbose = args.verbose
+exclude = []
+if args.exclude:
+    exclude = args.exclude
+vars = {}
+if args.vars:
+    vars = {key:value for (key,value) in args.vars}
+path = args.project_path
 output = args.output
+interactive = args.interactive
 
 import pyproject_parser as parser
 
 def find_meta(filename):
     meta = {}
     pyproject = parser._load_toml(filename)
-    author = pyproject["project"]["authors"][0]["name"]
+    authors = pyproject["project"]["authors"]
+    if len(authors) == 1:
+        meta["author"] = authors[0]["name"]
+        meta["email"] = authors[0]["email"]
+    else:
+        for index,author in enumerate(authors):
+            meta["author_" + str(index)] = author["name"]
+            meta["email_" + str(index)] = author["email"]
+        
     project_name = pyproject.get("project", {}).get("name", "")
-    meta["author"] = author
-    meta["name"] = project_name
+    meta['name'] = project_name
     return meta
 
 
 
 tree = []
-walk = os.walk(input)
+walk = os.walk(path)
 files_section = []
 for root, dirs, files in walk:
-    folder = root.replace(input, "", 1)[1:]   
+    folder = root.replace(path, "", 1)[1:]   
 
     if folder.strip():
         tree.append(folder + "/")
@@ -55,26 +68,62 @@ for root, dirs, files in walk:
 
         with open(filename, 'r') as f:
             lines = f.read()
+            lines = lines.split("\n")
         if file == "pyproject.toml":
             meta = find_meta(filename)
-        filename = filename.replace(input+ "/", "", 1)
-        files_section.append(f"=== {filename}\n" + lines)
+        filename = filename.replace(path+ "/", "", 1)
+        files_section.append((filename,[f"=== {filename}"] + lines))
 
-def replace_meta(meta,lines):
+def replace_meta(meta,lines,exclude=False):
     array = []
+    first = True
     for line in lines:
-        for k,v in meta.items():
-            line =re.sub(rf"(?<!\w)({v})", "{{"+ k +"}}", line)
+        if not exclude or first or line.startswith('import') or line.startswith('from'):
+            first = False
+            for k,v in meta.items():
+                line =re.sub(rf"(?<!\w)({v})", "{{"+ k +"}}", line,count=1)
         array.append(line)
     return array
 
+tree = replace_meta(meta,tree)
+
+def not_excluded(file):
+    if "all" in exclude:
+        return False
+    if file in exclude:
+        return False
+    ext = "." + file.split(".")[-1]
+    if ext in exclude:
+        return False
+    return True
+
+files_section = [replace_meta(meta,lines) if not_excluded(filename) else replace_meta(meta, lines, exclude=True) for (filename,lines) in files_section ] 
+files_section = ["\n".join(file) for file in files_section]
+meta['name'] = ''
+
+for key in vars:
+    if key in meta:
+        meta[key] = vars[key]
+    else:
+        print(f"Meta variable {key} does not exist")
+
+if interactive:
+    for key in meta:
+        if key not in vars:
+            answer = False
+            if key in meta:
+                while not answer:
+                    answer = input(f"Meta variable {key} has this value: {meta[key]}. If you want to change it input a new value, else just press Enter.\n> ")
+                    if answer:
+                        meta[key] = answer
+                    else:
+                        answer = True
+
 template="=== meta\n"
 template+="\n".join([f"{k}: {v}" for k,v in meta.items()])
-tree = replace_meta(meta,tree)
 template+="\n\n=== tree\n"
 template+="\n".join(tree) + "\n\n"
-files_section = replace_meta(meta,files_section)
-template+="".join(files_section)
+template+="\n".join(files_section)
 
 if output:
     with open(output, "w") as f:
