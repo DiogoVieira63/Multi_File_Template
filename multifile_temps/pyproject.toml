@@ -1,0 +1,20 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "multifile_temps"
+authors = [{name = "Eduardo Magalhães", email = "eduardomagalhaes107@gmail.com"},{name = "Diogo Vieira", email = "jdmartinsvieira63@gmail.com"}]
+readme = "README.md"
+license = {file = "LICENSE"}
+classifiers = ["License :: OSI Approved :: MIT License"]
+dynamic = ["version", "description"]
+
+dependencies = [ 
+    "argparse >= 1.4.0",
+    "pyproject-parser >= 0.9.0"
+]
+
+[project.scripts]
+mkfstree = "multifile_temps:run_mkfstree"
+mktemplateskel = "multifile_temps:run_mktemplateskel"
