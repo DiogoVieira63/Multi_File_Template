@@ -1,5 +1,6 @@
 import os
 import argparse
+import sys
 
 def name_type(string):
         if '=' not in string:
@@ -60,13 +61,27 @@ def mkfstree():
     
     parser = argparse.ArgumentParser(prog="mkfstree", epilog="Create a file system tree",description='mkfstree - Create a file system tree')
 
-    parser.add_argument('-v','--vars', metavar='vars', type=name_type, nargs='+', help='Meta variables of the project')
-    parser.add_argument('template', metavar='template', type=str, help='Path to the template file')
-    parser.add_argument('-o','--output', metavar='output', type=str, help='Path of the output folder')
+    parser.add_argument('-v','--vars', type=name_type, nargs='+', help='Meta variables of the project')
+    parser.add_argument('template', nargs='?', type=str, help='Path to the template file')
+    parser.add_argument('-o','--output', type=str, help='Path of the output folder')
     parser.add_argument('-i','--interactive',action='store_true',help='Interactive mode')
+    parser.add_argument('-t','--template-default',nargs='?',type=str,const=sys.stdout,help='Print or store the default template')
+    
 
 
     args = parser.parse_args()
+
+    if args.template_default:
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        filename = os.path.join(current_dir,'templates/template')
+        with open(filename, 'r') as f:
+            text = f.read()
+            if type(args.template_default) != str:
+                print(text)
+            else:
+                with open(args.template_default, "w") as f1:
+                    f1.write(text)
+            exit()
 
     if args.vars:
         vars = {key:value for (key,value) in args.vars}

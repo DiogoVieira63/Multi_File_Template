@@ -49,10 +49,10 @@ def not_excluded(file,exclude):
 def mktemplateskel(): 
     argparser = argparse.ArgumentParser(prog='mktemplateskel', epilog='Create Templates', description='mktemplateskel - Create Templates')
 
-    argparser.add_argument('-v', '--vars',type=name_type, nargs='+',help='Name of the template')
+    argparser.add_argument('-v', '--vars',type=name_type, nargs='+',help='Meta variables to replace in the template. Format: name=<value>')
     # parser.add_argument('-n','--name', metavar='name', type=str, help='Name of the template')
-    argparser.add_argument('-p','--project_path', metavar=str, type=str, help='Path to the input project')
-    argparser.add_argument('-o','--output', metavar='output', type=str, help='Path of the output file (template)')
+    argparser.add_argument('-p','--project_path', type=str, help='Path to the input project')
+    argparser.add_argument('-o','--output', type=str, help='Path of the output file (template)')
     argparser.add_argument('-i','--interactive',action='store_true',help='Interactive mode')
     argparser.add_argument('-e','--exclude',nargs='+',help="Don't change content of provided files. If you want to exclude all files just type -e all")
 
