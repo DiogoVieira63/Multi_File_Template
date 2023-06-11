@@ -82,7 +82,7 @@ To run this tool, just use the command **mkfstree** combined with the arguments/
 ### **Strategy**
 
 The strategy used to create the file system tree from a given template was the following:
-- Split the template file by secations
+- Split the template file by secctions
 - Parse the meta variables and store them in a dictionary
 - Parse the tree provided in the template and create the directories defined in the tree that will be needed for the pyproject
 - Parse the file sections. Create the files with the provided content in the respective path.

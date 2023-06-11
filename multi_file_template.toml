@@ -1,18 +1,6 @@
-=== meta
-name: mytool
-// provided or ask
-author: JJoao
-// provided or default
 
-=== tree
-pyproject.toml
-{{name}}/
-- __init__.py
-- {{name}}.md
-exemplo/
-README.md
-tests/
-- test-1.py
+
+
 
 === pyproject.toml
 [build-system]
@@ -41,3 +29,20 @@ import pytest
 import {{name}}
 def test_1():
     assert "FIXME" == "FIXME"
+
+=== tree
+pyproject.toml
+{{name}}/
+- __init__.py
+- {{name}}.md
+exemplo/
+README.md
+tests/
+- test-1.py
+
+
+=== meta
+name: mytool
+// provided or ask
+author: JJoao
+// provided or default

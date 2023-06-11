@@ -54,8 +54,8 @@ def parse_file(lines,meta,out):
     name = lines[0].strip()
     content = '\n'.join(lines[1:])
     path = os.path.join(out, name)
-    with open(path, 'w') as f:
-        f.write(content)
+    return path,content
+
 
 def mkfstree():
     
@@ -96,7 +96,7 @@ def mkfstree():
     interactive = args.interactive
     with open(template, 'r') as f:
         lines = f.read()
-
+    files = []
     sections = lines.split('===')[1:]
     for section in sections:
         lines = section.split('\n')
@@ -123,9 +123,18 @@ def mkfstree():
                     if not meta[m]:
                         print(f"Meta Variable {m} missing. Pass {m} as a parameter with -v {m}=... or use interactive mode with -i")
                         exit()
+
+    for section in sections:
+        lines = section.split('\n')
+        name = lines[0].strip()
+        if name == 'meta':
+            pass
         elif name == 'tree':
-            tree = parse_tree(lines[1:],meta,out)            
+            parse_tree(lines[1:],meta,out)            
         else:
-            parse_file(lines,meta,out)
-        lines = lines[1:]
+            path,content = parse_file(lines,meta,out)
+            files.append((path,content))
+    for file in files:
+        with open(file[0], 'w') as f:
+            f.write(file[1])
 
