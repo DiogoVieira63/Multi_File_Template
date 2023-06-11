@@ -93,14 +93,11 @@ def mkfstree():
 
     out = args.output
     if not out: out = "output"
-
     interactive = args.interactive
-
     with open(template, 'r') as f:
         lines = f.read()
 
     sections = lines.split('===')[1:]
-
     for section in sections:
         lines = section.split('\n')
         name = lines[0].strip()
@@ -108,7 +105,6 @@ def mkfstree():
             meta = parse_meta(lines[1:])
             for key in vars:
                 meta[key] = vars[key]
-
             for m in meta:
                 if interactive:
                     answer = False
@@ -127,8 +123,6 @@ def mkfstree():
                     if not meta[m]:
                         print(f"Meta Variable {m} missing. Pass {m} as a parameter with -v {m}=... or use interactive mode with -i")
                         exit()
-
-
         elif name == 'tree':
             tree = parse_tree(lines[1:],meta,out)            
         else:

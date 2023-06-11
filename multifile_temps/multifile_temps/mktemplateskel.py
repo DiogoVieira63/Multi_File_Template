@@ -67,9 +67,14 @@ def mktemplateskel():
     output = args.output
     interactive = args.interactive
 
+    if not path:
+        print("You must provide a path to the project. Use -p or --project_path")
+        exit(1)
+
     tree = []
     walk = os.walk(path)
     files_section = []
+    has_pyproject = False
     for root, dirs, files in walk:
         folder = root.replace(path, "", 1)[1:]   
 
@@ -88,11 +93,16 @@ def mktemplateskel():
                 lines = f.read()
                 lines = lines.split("\n")
             if file == "pyproject.toml":
+                has_pyproject = True
                 meta = find_meta(filename)
             filename = filename.replace(path+ "/", "", 1)
             files_section.append((filename,[f"=== {filename}"] + lines))
 
     
+    if not has_pyproject:
+        print("No pyproject.toml found. The system tree must have a pyproject.toml file.")
+        exit(1)
+
     tree = replace_meta(meta,tree)
 
     files_section = [replace_meta(meta,lines) if not_excluded(filename, exclude) else replace_meta(meta, lines, exclude=True) for (filename,lines) in files_section ] 
